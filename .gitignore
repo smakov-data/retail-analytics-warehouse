@@ -1,4 +1,27 @@
-
+# dbt artifacts
 target/
 dbt_packages/
 logs/
+manifest.json
+run_results.json
+
+# dbt Cloud
+dbt_modules/
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Snowflake temp
+*.log
+
+# Environment files
+.env
