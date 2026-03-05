@@ -1,13 +1,14 @@
 
-
+/*
+This script create staging layer (view( based on raw data from dbt database snowlake.
+*/
 
 with raw_sales as (
     select * from {{ source('raw', 'SALES') }}
 ),
 --if CAP then CAP
 
-
-cleaned_sales as (
+final as (
     
     select
         invoice as invoice_id,
@@ -20,9 +21,13 @@ cleaned_sales as (
         country,
 
         case when left(invoice, 1) = 'C' then true else false end as is_cancelled,
-        quantity * cast(price as decimal(18,2)) as sales_amount
+        quantity * cast(price as decimal(18,2)) as sales_amount,
+    
+    
+        {{ dbt_utils.generate_surrogate_key(['invoice','stockcode','invoicedate',"coalesce(customer_id, 'IF_ID_NULL_PLACEHOLDER')"]) }} as order_line_key
+        --{{ dbt_utils.generate_surrogate_key(['invoice','stockcode','invoicedate',"coalesce(customer_id, '__NA__')"]) }} as order_line_key
     from raw_sales
 )       
 
 
-select * from cleaned_sales
+select * from final

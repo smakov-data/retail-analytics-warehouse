@@ -7,9 +7,8 @@ sources: #sources for staging
     #description: 'add inf'
     
     database: ANALYTICS_DB #+
-    description: 'inf 001'
     schema: RAW #source schema name -> where add data
-    description: 'inf 002'
+    description: 'inf 001'
 
     tables: 
       - name: SALES #source table name -> where add data+++ if capital = capital!!!
