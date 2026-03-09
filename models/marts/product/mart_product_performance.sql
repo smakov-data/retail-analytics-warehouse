@@ -1,0 +1,32 @@
+with fct_order_lines as (
+    select * from {{ ref('fct_order_lines') }}
+),
+
+sku as (
+    select
+        stock_code,
+        sum(case when not is_cancelled then quantity else 0 end) as units_sold,
+        count(distinct invoice_id) as orders_cnt,
+        sum(sales_amount) as sku_net_revenue,
+
+        sum(case when not is_cancelled then sales_amount else 0 end) as gross_amount,
+        sum(case when is_cancelled then sales_amount else 0 end) as cancelled_amount
+    from fct_order_lines
+    group by stock_code
+),
+
+final as (
+    select
+        stock_code,
+        units_sold,
+        orders_cnt,
+        sku_net_revenue,
+        abs(cancelled_amount / nullif(gross_amount, 0)) as return_rate,
+        sku_net_revenue / nullif(sum(sku_net_revenue) over (), 0) as revenue_share,
+        sum(sku_net_revenue) over (order by sku_net_revenue desc)
+            / nullif(sum(sku_net_revenue) over (), 0) as cumulative_share,
+        sku_net_revenue / nullif(orders_cnt, 0) as avg_order_value_per_sku
+    from sku
+)
+
+select * from final

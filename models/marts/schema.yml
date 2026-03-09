@@ -1,0 +1,116 @@
+version: 2
+
+models:
+  - name: fct_order_lines
+    description: > 
+      Atomic fact table containing one row per product line in an invoice.
+      Grain: one row per product per invoice.
+    
+    columns:
+      - name: order_line_key
+        description: Surrogate key for order line grain.
+        tests: [not_null, unique]
+      - name: invoice_id
+        description: Invoice identifier.
+        tests: [not_null]
+      - name: stock_code
+        description: Product identifier referenced from dim_product.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_product')
+              field: stock_code
+      - name: order_date
+        description: Date when the order was created.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: order_date
+
+
+  - name: fct_orders
+    description: >
+      Order-level fact table with one row per invoice.
+      Grain: one row per invoice.
+    
+    columns:
+      - name: invoice_id
+        description: Unique invoice identifier.
+        tests: [not_null, unique]
+      - name: order_date
+        description: Date of the order.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: order_date
+      - name: customer_id
+        description: Identifier of the customer placing the order.
+        tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+
+
+  - name: dim_product
+    description: >
+      Product dimension containing unique product identifiers and descriptions.
+      Grain: one row per product (stock_code).
+    
+    columns:
+      - name: stock_code
+        description: Unique product identifier.
+        tests: [not_null, unique]
+      - name: product_description
+        description: Text description of the product.
+        ##tests: [not_null]
+
+
+  - name: dim_date
+    description: >
+      Date dimension used for time-based analytics.
+      Grain: one row per calendar date.
+    columns:
+      - name: order_date
+        description: Calendar date used to join with fact tables.
+        tests: [not_null, unique]
+
+  - name: dim_customer
+    description: >
+      Customer dimension containing unique customer identifiers.
+      Grain: one row per customer.
+    columns:
+      - name: customer_id
+        description: Unique identifier of the customer.
+        tests: [not_null, unique]
+
+  
+  
+  
+  - name: mart_revenue_daily
+    description: >
+      Finance mart aggregating daily revenue metrics.
+      Grain: one row per order date.
+    columns:
+      - name: order_date
+        description: Calendar date for daily revenue aggregation.
+        tests: [not_null, unique]
+
+  - name: mart_customer_metrics
+    description: >
+      Marketing mart containing aggregated customer-level metrics.
+      Grain: one row per customer.
+    columns:
+      - name: customer_id
+        description: Unique identifier of the customer.
+        tests: [not_null, unique]
+
+  - name: mart_product_performance
+    description: >
+      Product performance mart with aggregated sales and return metrics by SKU.
+      Grain: one row per product (stock_code).
+    columns:
+      - name: stock_code
+        description: Unique product identifier.
+        tests: [not_null, unique]
