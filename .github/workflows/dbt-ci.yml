@@ -26,5 +26,25 @@ jobs:
       - name: Install dependencies
         run: dbt deps
 
+      - name: Create dummy profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          dbt_snowflake_demo_repo:
+            target: ci
+            outputs:
+              ci:
+                type: snowflake
+                account: dummy
+                user: dummy
+                password: dummy
+                role: dummy
+                database: dummy
+                warehouse: dummy
+                schema: dummy
+                threads: 1
+                client_session_keep_alive: false
+          EOF
+
       - name: Parse project
-        run: dbt parse
+        run: dbt parse --profiles-dir ~/.dbt
