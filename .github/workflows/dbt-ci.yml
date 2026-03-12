@@ -1,9 +1,13 @@
 name: dbt CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   dbt-ci:
@@ -23,28 +27,55 @@ jobs:
           python -m pip install --upgrade pip
           pip install dbt-snowflake
 
+      - name: Install unzip
+        run: sudo apt-get update && sudo apt-get install -y unzip
+
       - name: Install dependencies
         run: dbt deps
 
-      - name: Create dummy profiles.yml
+      - name: Create CI profiles.yml
         run: |
           mkdir -p ~/.dbt
-          cat > ~/.dbt/profiles.yml << 'EOF'
+          cat > ~/.dbt/profiles.yml << EOF
           dbt_snowflake_demo_repo:
             target: ci
             outputs:
               ci:
                 type: snowflake
-                account: dummy
-                user: dummy
-                password: dummy
-                role: dummy
-                database: dummy
-                warehouse: dummy
-                schema: dummy
-                threads: 1
+                account: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+                user: ${{ secrets.SNOWFLAKE_USER }}
+                password: ${{ secrets.SNOWFLAKE_PASSWORD }}
+                role: ${{ secrets.SNOWFLAKE_ROLE }}
+                database: ${{ secrets.SNOWFLAKE_DATABASE }}
+                warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+                schema: DBT_CI
+                threads: 4
                 client_session_keep_alive: false
           EOF
 
-      - name: Parse project
-        run: dbt parse --profiles-dir ~/.dbt
+      - name: Download latest prod manifest artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir -p state
+
+          ARTIFACT_ID=$(gh api /repos/$REPO/actions/artifacts --jq '.artifacts[] | select(.name=="prod-manifest" and .expired==false) | .id' | head -n 1)
+
+          if [ -z "$ARTIFACT_ID" ]; then
+            echo "No prod-manifest artifact found"
+            exit 1
+          fi
+
+          gh api /repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip > state/prod-manifest.zip
+
+          unzip -o state/prod-manifest.zip -d state
+          ls -la state
+
+      - name: Slim CI build
+        run: |
+          dbt build \
+            --profiles-dir ~/.dbt \
+            --select state:modified+ \
+            --defer \
+            --state state

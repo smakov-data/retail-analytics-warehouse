@@ -50,3 +50,11 @@ jobs:
 
       - name: Build dbt project
         run: dbt build --profiles-dir ~/.dbt
+
+
+      - name: Upload prod manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-manifest
+          path: target/manifest.json
+          retention-days: 30
