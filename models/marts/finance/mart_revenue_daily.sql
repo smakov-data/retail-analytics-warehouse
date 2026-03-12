@@ -16,3 +16,4 @@ final as (
 select * from final
 
 -- test slim ci
+-- test slim ci #2 - schema isolation
