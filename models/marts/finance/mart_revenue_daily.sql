@@ -14,3 +14,5 @@ final as (
 )
 
 select * from final
+
+-- test slim ci
