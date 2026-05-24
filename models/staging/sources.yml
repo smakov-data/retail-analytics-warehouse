@@ -1,31 +1,30 @@
 version: 2
 
-sources: #sources for staging
-  - name: raw 
-    #any name - butch he match with database name - snowflake_sample_date - analytics_db
-    #when we use this source func we use this name as link/ref
-    #description: 'add inf'
-    
-    database: ANALYTICS_DB #+
-    schema: RAW #source schema name -> where add data
+sources:
+  - name: raw
+    database: ANALYTICS_DB
+    schema: RAW
     description: 'Raw Online Retail sales data loaded into Snowflake'
 
-    tables: 
-      - name: SALES #source table name -> where add data+++ if capital = capital!!!
-        #description: 'Source table'
+    tables:
+      - name: SALES
         columns:
           - name: INVOICE
             tests:
-              - not_null 
+              - not_null
+
           - name: STOCKCODE
             tests:
               - not_null
+
           - name: QUANTITY
-            tests: 
+            tests:
               - not_null
+
           - name: INVOICEDATE
-            tests: 
+            tests:
               - not_null
+
           - name: PRICE
             tests:
               - not_null
