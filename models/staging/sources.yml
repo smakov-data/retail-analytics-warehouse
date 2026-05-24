@@ -8,7 +8,7 @@ sources: #sources for staging
     
     database: ANALYTICS_DB #+
     schema: RAW #source schema name -> where add data
-    description: 'inf 001'
+    description: 'Raw Online Retail sales data loaded into Snowflake'
 
     tables: 
       - name: SALES #source table name -> where add data+++ if capital = capital!!!
