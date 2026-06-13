@@ -1,224 +1,307 @@
-## Enterprise Retail Analytics Data Warehouse
-(Snowflake + dbt + CI/CD)
+# Enterprise Retail Analytics Data Warehouse
 
-This project demonstrates the design and implementation of a modern analytics data warehouse built with Snowflake and dbt to support business reporting, product analytics, and customer insights.
+**Snowflake + dbt + GitHub Actions (CI/CD)**
 
-The solution applies modern analytics engineering practices, including layered data modeling, dimensional modeling, data quality testing, and automated CI/CD pipelines.
+## 1. Business Scenario
 
-The focus of the project is transforming raw transactional e-commerce data into reliable analytical models optimized for reporting and analytical workloads.
+A UK-based online retailer generates transactional sales data from its e-commerce platform.
 
-Dataset used: Online Retail II (UCI Machine Learning Repository)
+The raw data contains:
+
+* cancellations and returns
+* duplicate order lines
+* inconsistent structures
+* limited analytical usability
+
+Business teams require trusted datasets to support:
+
+* revenue reporting
+* customer analytics
+* product performance analysis
+* operational decision-making
+
+The objective is to transform raw transactional data into a structured analytics warehouse using Snowflake and dbt, providing reliable datasets for reporting and business intelligence.
+
+Dataset used:
+
+**Online Retail II (UCI Machine Learning Repository)**
+
 ~1M e-commerce transactions from a UK-based online retailer.
 
-## 1. Architecture Overview
+---
 
-The solution follows a modern dbt layered architecture:
+## 2. Architecture Overview
 
-PNG
+The solution follows a modern dbt layered architecture.
 
-Staging Layer
+### Staging Layer
+
 Stores cleaned and standardized source data.
 
 Responsibilities include:
-- column normalization
-- data type standardization
-- basic data validation
-- source column renaming
 
-Model: `stg_sales`
+* column normalization
+* data type standardization
+* basic data validation
+* source column renaming
 
+Model:
 
-Core Analytical Layer
-Implements the central analytical model with fact and dimension tables.
+* `stg_sales`
+
+### Core Analytical Layer
+
+Implements the central analytical model using fact and dimension tables.
 
 Tables:
-- `fct_order_lines`
-- `fct_orders`
-- `dim_customer`
-- `dim_product`
-- `dim_date`
+
+* `fct_order_lines`
+* `fct_orders`
+* `dim_customer`
+* `dim_product`
+* `dim_date`
+
 This layer standardizes business entities and prepares data for analytical use.
 
-Data Mart Layer
+### Data Mart Layer
+
 Domain-specific analytical datasets for business teams.
 
 Domains:
-- finance
-- marketing
-- product
+
+* finance
+* marketing
+* product
 
 Tables:
-- `mart_revenue_daily`
-- `mart_customer_metrics`
-- `mart_product_performance`
+
+* `mart_revenue_daily`
+* `mart_customer_metrics`
+* `mart_product_performance`
 
 These datasets are optimized for BI reporting and analytical queries.
 
-## 2. Data Flow
+---
 
-Source dataset contains the following attributes:
-- Invoice
-- StockCode
-- Description
-- Quantity
-- InvoiceDate
-- UnitPrice
-- CustomerID
-- Country
+## 3. Data Flow
 
-Pipeline flow:
-PNG
+Source dataset contains:
 
-The pipeline transforms raw transactional records into structured analytical datasets ready for reporting and analysis.
+* Invoice
+* StockCode
+* Description
+* Quantity
+* InvoiceDate
+* UnitPrice
+* CustomerID
+* Country
 
-## 3. Core Analytical Model
-The warehouse implements a star schema optimized for analytics workloads.
+Pipeline Flow:
 
-Fact Table - `fct_order_lines`
-Grain: one row per product per invoice
+Raw Sales Data
+
+↓
+
+Staging Layer (`stg_sales`)
+
+↓
+
+Core Models (`facts + dimensions`)
+
+↓
+
+Business Data Marts
+
+↓
+
+BI Reporting / Analytics
+
+The pipeline transforms raw transactional records into structured analytical datasets ready for reporting and business analysis.
+
+---
+
+## 4. Star Schema & Core Models
+
+The warehouse implements a dimensional star schema designed for analytical reporting and BI workloads.
+
+Fact tables store business events and measures.
+
+Dimension tables provide business context used for filtering, grouping, and aggregation.
+
+### Fact Table — `fct_order_lines`
+
+**Grain:** One row per product per invoice.
 
 Contains:
-- quantity
-- unit price
-- sales amount
-- cancellation indicator
 
-Fact Table - `fct_orders`
-Grain: one row per invoice
+* quantity
+* unit price
+* sales amount
+* cancellation indicator
 
-Contains aggregated order metrics:
-- total items
-- gross revenue
-- cancelled revenue
-- net revenue
+### Fact Table — `fct_orders`
 
-Dimension Tables:
-- `dim_customer`
-- `dim_product`
-- `dim_date`
+**Grain:** One row per invoice.
 
-These dimensions enable analysis across:
-- customers
-- products
-- time
+Contains:
 
+* total items
+* gross revenue
+* cancelled revenue
+* net revenue
 
-## 4. Analytical Data Marts
-Finance Mart - `mart_revenue_daily`
+### Dimension Tables
+
+* `dim_customer`
+* `dim_product`
+* `dim_date`
+
+These dimensions support analysis across:
+
+* customers
+* products
+* time
+
+---
+
+## 5. Analytical Data Marts
+
+### Finance Mart — `mart_revenue_daily`
 
 Daily financial metrics:
-- gross revenue
-- net revenue
-- cancelled revenue
+
+* gross revenue
+* net revenue
+* cancelled revenue
 
 Used for:
-- financial reporting
-- revenue trend analysis
 
-Marketing Mart - `mart_customer_metrics`
+* financial reporting
+* revenue trend analysis
+
+### Marketing Mart — `mart_customer_metrics`
 
 Customer-level metrics:
-- number of orders
-- total revenue
-- first purchase date
-- last purchase date
+
+* number of orders
+* total revenue
+* first purchase date
+* last purchase date
 
 Used for:
-- customer analytics
-- retention analysis
 
-Product Mart - `mart_product_performance`
+* customer analytics
+* customer value analysis
+* retention analysis
+
+### Product Mart — `mart_product_performance`
+
 Product-level performance metrics:
-- units sold
-- order counts
-- revenue share
-- return rate
-- cumulative revenue share
+
+* units sold
+* order counts
+* revenue share
+* return rate
+* cumulative revenue share
 
 Used for:
-- product performance analysis
-- assortment optimization
 
-## 5. Data Quality Controls
+* product performance analysis
+* assortment optimization
+
+---
+
+## 6. Data Quality Controls
+
 Data quality is implemented using dbt tests.
 
 Controls include:
-- null checks
-- uniqueness checks
-- referential integrity validation
-- relationship tests between fact and dimension tables
 
-Example:
-- `not_null`
-- `unique`
-- `relationships`
-These controls ensure data consistency and integrity across the analytical model.
+* not null validation
+* uniqueness validation
+* referential integrity validation
+* relationship testing between fact and dimension tables
 
-## 6. CI/CD Pipeline
-The project implements automated CI/CD pipelines using GitHub Actions.
+Examples:
+
+* `not_null`
+* `unique`
+* `relationships`
+
+These controls ensure consistency and integrity across the analytical model.
+
+---
+
+## 7. CI/CD Automation
+
+The project uses GitHub Actions to automate validation and deployment workflows.
 
 Pipeline definitions:
-- `.github/workflows/dbt-ci.yml`
-- `.github/workflows/dbt-cd.yml`
 
-Continuous Integration
-CI runs on:
-- pull requests
-- feature branches
+* `.github/workflows/dbt-ci.yml`
+* `.github/workflows/dbt-cd.yml`
 
-Pipeline steps:
-- Checkout repository
-- Setup Python
-- Install dbt-snowflake
-- Install dependencies
-- Download production manifest
-- Run Slim CI build
+### Continuous Integration (CI)
 
-Slim CI command:
-`dbt build --select state:modified+ --defer --state state`
+CI validates project changes before deployment.
 
-Benefits:
-- builds only modified models
-- faster validation
-- reuses production models where possible
+Typical validation steps:
 
-Continuous Deployment
-CD runs on:
-`push to main branch`
+* checkout repository
+* setup Python
+* install dbt-snowflake
+* install dependencies
+* dbt parsing and validation
+* dbt test execution
+
+### Continuous Deployment (CD)
+
+CD runs automatically on push to the main branch.
 
 Pipeline steps:
-- Checkout repo
-- Install dbt
-- dbt deps
-- dbt debug
-- dbt build
-The deployment pipeline builds the entire dbt project in the Snowflake production environment.
 
-## 7. Snowflake Infrastructure Setup
+* checkout repository
+* install dbt
+* dbt deps
+* dbt debug
+* dbt build
+
+This process automatically deploys the latest analytical models into Snowflake.
+
+---
+
+## 8. Snowflake Infrastructure Setup
 
 The repository includes infrastructure setup scripts.
-```
+
+```text
 infra/
-    init_snowflake.sql
+└── init_snowflake.sql
 ```
+
 The script creates:
-- warehouse
-- database
-- schema
-- roles
-- user permissions
+
+* warehouse
+* database
+* schema
+* roles
+* permissions
 
 Example components:
-DBT_WH warehouse
-ANALYTICS_DB database
-DBT_ROLE role
-DBT_USER user
 
-This allows the project environment to be reproducible and deployable.
+* `DBT_WH`
+* `ANALYTICS`
+* `RAW`
+* `MART`
 
-## 8. Repository Structure
-```
-dbt_snowflake_demo_repo/
+This makes the environment reproducible and easy to deploy.
+
+---
+
+## 9. Repository Structure
+
+```text
+retail-analytics-warehouse/
 
 ├── models
 │
@@ -244,60 +327,88 @@ dbt_snowflake_demo_repo/
 │
 ├── macros
 ├── tests
-├── seeds
-├── snapshots
-│
 ├── infra
-│   └── init_snowflake.sql
-│
 ├── .github/workflows
-│   ├── dbt-ci.yml
-│   └── dbt-cd.yml
-│
-└── dbt_project.yml
+├── dbt_project.yml
+└── README.md
 ```
 
-## 9. Technical Scope
+---
 
-Data modeling:
-- dimensional modeling
-- star schema design
-- fact and dimension tables
+## 10. Business Questions Answered
 
-Transformation framework:
-- dbt
+The analytical model supports answering questions such as:
 
-Data warehouse:
-- Snowflake
+* How does revenue change over time?
+* Which products generate the highest revenue?
+* Which customers contribute the most revenue?
+* What percentage of sales is returned or cancelled?
+* Which products have the highest return rates?
+* How many active customers purchase each month?
+* How does customer purchasing behavior evolve over time?
 
-Automation:
-- GitHub Actions
-- CI/CD pipelines
-- Slim CI
+---
 
-Languages and tools:
-- SQL
-- Git
-- GitHub
+## 11. Technical Scope
 
-## 10. Use Cases
+### Data Modeling
+
+* dimensional modeling
+* star schema design
+* fact and dimension tables
+
+### Data Transformation
+
+* dbt
+
+### Data Warehouse
+
+* Snowflake
+
+### Automation
+
+* GitHub Actions
+* CI/CD pipelines
+
+### Development Tools
+
+* SQL
+* Git
+* GitHub
+
+---
+
+## 12. Technologies
+
+* Snowflake
+* dbt
+* SQL
+* Git
+* GitHub Actions
+* CI/CD
+* Dimensional Modeling
+
+---
+
+## 13. Use Cases
 
 This project demonstrates capabilities relevant for:
-- Data Engineer
-- Analytics Engineer
-- Data Warehouse Developer
-- BI Engineer
-- SQL Developer
 
-## 11. Technologies
+* Analytics Engineer
+* Data Engineer
+* Data Warehouse Developer
+* BI Engineer
+* SQL Developer
 
-Snowflake
-dbt
-SQL
-Git
-GitHub Actions
-CI/CD pipelines
-Dimensional data modeling
+---
 
+## 14. Project Outcomes
 
+The solution delivers:
 
+* standardized analytical datasets
+* dimensional models optimized for reporting
+* automated testing and deployment workflows
+* reusable business-focused data marts
+
+The project demonstrates practical Analytics Engineering workflows using Snowflake, dbt, SQL, Git, and GitHub Actions.
