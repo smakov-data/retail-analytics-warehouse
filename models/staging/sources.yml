@@ -2,16 +2,10 @@ version: 2
 
 sources:
   - name: raw
-<<<<<<< HEAD
-    database: ANALYTICS_DB
-    schema: RAW
-    description: 'Raw Online Retail sales data loaded into Snowflake'
-=======
     # позволит испольховать ref = {{ source('raw', 'SALES') }}
     database: ANALYTICS
     schema: RAW
     description: 'Raw source sales data loaded into Snowflake'
->>>>>>> test-slim-ci
 
     tables:
       - name: SALES
@@ -19,10 +13,6 @@ sources:
           - name: INVOICE
             tests:
               - not_null
-<<<<<<< HEAD
-
-=======
->>>>>>> test-slim-ci
           - name: STOCKCODE
             tests:
               - not_null
