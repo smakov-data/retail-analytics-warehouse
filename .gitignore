@@ -20,8 +20,14 @@ __pycache__/
 # VS Code
 .vscode/
 
+# JetBrains
+.idea/
+
 # Snowflake temp
 *.log
 
 # Environment files
 .env
+
+# dbt credentials
+profiles.yml

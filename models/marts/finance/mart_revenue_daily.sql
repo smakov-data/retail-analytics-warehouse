@@ -6,9 +6,9 @@ with fct_orders as (
 final as (
     SELECT
         order_date, 
-        sum(net_amount) AS net,
-        sum(gross_amount) AS gross,
-        sum(cancelled_amount) AS cancelled
+        sum(net_amount) AS net_revenue,
+        sum(gross_amount) AS gross_revenue,
+        sum(cancelled_amount) AS cancelled_revenue
     FROM fct_orders
     GROUP BY order_date
 )
