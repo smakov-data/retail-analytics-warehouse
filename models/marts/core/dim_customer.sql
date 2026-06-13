@@ -1,14 +1,26 @@
-with stg_sales as (
-    select * from {{ ref('stg_sales') }}
+WITH stg_sales AS (
+    SELECT * FROM {{ ref('stg_sales') }}
 ),
 
-final as (
-    select
+dedup AS (
+    SELECT
         customer_id,
-        max(country) as country -- one country
-    from stg_sales
-    where customer_id is not null -- kick guests
-    group by customer_id -- dim: group_by id
+        country,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id
+            ORDER BY invoice_timestamp DESC
+        ) AS rn
+    FROM stg_sales
+    WHERE customer_id IS NOT NULL
+),
+
+final AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['customer_id']) }} AS customer_key, -- gen customer_key, for future joins and SCD, better for DWH
+        customer_id,
+        country
+    FROM dedup
+    WHERE rn = 1
 )
 
-select * from final
+SELECT * FROM final

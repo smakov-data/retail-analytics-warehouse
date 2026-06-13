@@ -2,11 +2,12 @@ WITH SOURCE AS (
     SELECT * FROM {{ ref('stg_sales') }}
 ),
 
-dates AS ( -- или какое лучше имя дать?
+dates AS (
     SELECT DISTINCT
         to_date(invoice_timestamp) AS order_date
         
     FROM source
+    WHERE invoice_timestamp IS NOT NULL -- чтобы не 
 ),
 
 FINAL AS (

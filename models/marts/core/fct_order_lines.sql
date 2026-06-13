@@ -1,21 +1,34 @@
 
-with stg_sales as (
-    select * from {{ ref('stg_sales') }}
+
+WITH stg_sales AS (
+    SELECT * FROM {{ ref('stg_sales') }}
 ),
 
-final as (
+dim_customer AS (
+    SELECT * FROM {{ ref('dim_customer') }}
+),
+
+final AS (
     SELECT
-        -- ID
-        order_line_key,
-        invoice_id,
-        stock_code,
-        to_date(invoice_timestamp) AS order_date,
-        invoice_timestamp,
-        quantity,
-        unit_price, 
-        sales_amount,
-        is_cancelled
-    FROM stg_sales
+        s.order_line_key,
+        s.invoice_id,
+
+        c.customer_key,
+        s.customer_id,
+
+        s.stock_code,
+        TO_DATE(s.invoice_timestamp) AS order_date,
+        s.invoice_timestamp,
+
+        s.quantity,
+        s.unit_price,
+        s.sales_amount,
+        s.is_cancelled
+
+    -- JOIN
+    FROM stg_sales s
+    LEFT JOIN dim_customer c
+        ON s.customer_id = c.customer_id
 )
 
-select * from final
+SELECT * FROM final
