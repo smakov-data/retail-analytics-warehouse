@@ -119,6 +119,12 @@ BI Reporting / Analytics
 
 The pipeline transforms raw transactional records into structured analytical datasets ready for reporting and business analysis.
 
+### dbt Model Lineage
+
+The diagram below shows model dependencies and data flow across the dbt project.
+
+![dbt Lineage](docs/dbt_lineage.png)
+
 ---
 
 ## 4. Analytics Warehouse Data Model
