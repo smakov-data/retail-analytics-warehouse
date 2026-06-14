@@ -24,9 +24,16 @@ models:
         description: Date when the order was created.
         tests:
           - not_null
+
+      - name: date_key
+        description: Smart date key in YYYYMMDD format referenced from dim_date.
+        tests:
+          - not_null
           - relationships:
-              to: ref('dim_date')
-              field: order_date
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+
 
 
   - name: fct_orders
@@ -74,6 +81,9 @@ models:
     columns:
       - name: order_date
         description: Calendar date used to join with fact tables.
+        tests: [not_null, unique]
+      - name: date_key
+        description: Smart date key in YYYYMMDD format used to join with fact tables.
         tests: [not_null, unique]
 
   - name: dim_customer

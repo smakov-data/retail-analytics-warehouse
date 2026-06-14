@@ -18,6 +18,7 @@ final AS (
 
         s.stock_code,
         TO_DATE(s.invoice_timestamp) AS order_date,
+        to_number(to_char(TO_DATE(s.invoice_timestamp),'YYYYMMDD')) AS date_key, -- date_key - Enterpcie Practise (Spot #2)
         s.invoice_timestamp,
 
         s.quantity,
