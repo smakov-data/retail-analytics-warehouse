@@ -1,4 +1,16 @@
+/*
+Model:
+fct_order_lines
 
+Purpose:
+Order line fact table used for product-level sales analysis.
+
+Grain:
+One row per invoice line.
+
+Source:
+stg_sales
+*/
 
 WITH stg_sales AS (
     SELECT * FROM {{ ref('stg_sales') }}
@@ -22,8 +34,8 @@ final AS (
         s.customer_id,
 
         s.stock_code,
-        TO_DATE(s.invoice_timestamp) AS order_date,
-        d.date_key, -- тянем из dim_date
+        TO_DATE(s.invoice_timestamp) AS order_date, -- Retain human-readable date alongside date_key
+        d.date_key, -- Retrieve surrogate date key from the date dimension
         s.invoice_timestamp,
 
         s.quantity,
@@ -31,13 +43,11 @@ final AS (
         s.sales_amount,
         s.is_cancelled
 
-    -- JOIN
     FROM stg_sales s
     LEFT JOIN dim_customer c
         ON s.customer_id = c.customer_id
     LEFT JOIN dim_date d
-        ON TO_DATE(s.invoice_timestamp) = d.order_date -- подгонка формата инвойса со временем К order_date
-        -- кста, такой же ту_дейт используется в dim_date - это не бьется, просто такой же подход 
+        ON TO_DATE(s.invoice_timestamp) = d.order_date
 )
 
 SELECT * FROM final

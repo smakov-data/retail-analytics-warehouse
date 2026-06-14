@@ -1,3 +1,16 @@
+/*
+Model:
+mart_revenue_daily
+
+Purpose:
+Daily revenue reporting mart used for trend analysis.
+
+Grain:
+One row per calendar date.
+
+Source:
+fct_orders
+*/
 
 with fct_orders as (
     select * from {{ ref('fct_orders') }}
@@ -15,6 +28,3 @@ final as (
 )
 
 select * from final
-
--- test slim ci
--- test slim ci #2 - schema isolation

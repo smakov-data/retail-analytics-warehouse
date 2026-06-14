@@ -2,7 +2,6 @@ version: 2
 
 sources:
   - name: raw
-    # позволит испольховать ref = {{ source('raw', 'SALES') }}
     database: ANALYTICS
     schema: RAW
     description: 'Raw source sales data loaded into Snowflake'

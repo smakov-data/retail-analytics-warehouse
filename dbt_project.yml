@@ -22,8 +22,7 @@ clean-targets:
 models:
   dbt_snowflake_demo_repo:
     staging:
-      +schema: STAGING #name of schema what the model will use then it created
-      #but = defoult dbt settings = old_schema_name.new_schema_name = use macros.
+      +schema: STAGING
       +materialized: view 
     marts:
       +schema: MART

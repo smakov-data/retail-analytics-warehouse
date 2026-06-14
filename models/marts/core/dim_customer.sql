@@ -1,3 +1,17 @@
+/*
+Model:
+dim_customer
+
+Purpose:
+Customer dimension used for customer-level reporting and analysis.
+
+Grain:
+One row per customer.
+
+Source:
+stg_sales
+*/
+
 WITH stg_sales AS (
     SELECT * FROM {{ ref('stg_sales') }}
 ),
@@ -16,7 +30,7 @@ dedup AS (
 
 final AS (
     SELECT
-        {{ dbt_utils.generate_surrogate_key(['customer_id']) }} AS customer_key, -- gen customer_key, for future joins and SCD, better for DWH
+        {{ dbt_utils.generate_surrogate_key(['customer_id']) }} AS customer_key, -- Generate warehouse surrogate key from source customer_id = Used for dimensional joins and future SCD implementations
         customer_id,
         country
     FROM dedup

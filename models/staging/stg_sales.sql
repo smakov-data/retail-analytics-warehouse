@@ -1,12 +1,20 @@
-
 /*
-This script creates a staging layer view based on raw sales data from Snowflake.
+Model:
+stg_sales
+
+Purpose:
+Clean and standardize raw sales data from the source system.
+
+Grain:
+One row per invoice line item.
+
+Source:
+raw.sales
 */
 
 with raw_sales as (
     select * from {{ source('raw', 'SALES') }}
 ),
---if CAP then CAP
 
 base as (
     
@@ -17,7 +25,7 @@ base as (
         quantity,
         invoicedate as invoice_timestamp,
         cast(price as decimal(18,2)) as unit_price,
-        CAST(customerid AS VARCHAR) AS customer_id, -- VARCHAR (а не int) : nulls, мусор, пустые, нечисловые значения
+        CAST(customerid AS VARCHAR) AS customer_id, -- CustomerID is stored as VARCHAR to safely handle null and non-numeric source values
         country,
 
         case when left(invoice, 1) = 'C' then true else false end as is_cancelled,
