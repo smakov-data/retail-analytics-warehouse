@@ -1,6 +1,6 @@
 # Enterprise Retail Analytics Data Warehouse
 
-**Snowflake + dbt + GitHub Actions (CI/CD)**
+--Snowflake + dbt + GitHub Actions (CI/CD)--
 
 ## 1. Business Scenario
 
@@ -8,24 +8,23 @@ A UK-based online retailer generates transactional sales data from its e-commerc
 
 The raw data contains:
 
-* cancellations and returns
-* duplicate order lines
-* inconsistent structures
-* limited analytical usability
+- cancellations and returns
+- duplicate order lines
+- inconsistent structures
+- limited analytical usability
 
 Business teams require trusted datasets to support:
 
-* revenue reporting
-* customer analytics
-* product performance analysis
-* operational decision-making
+- revenue reporting
+- customer analytics
+- product performance analysis
+- operational decision-making
 
 The objective is to transform raw transactional data into a structured analytics warehouse using Snowflake and dbt, providing reliable datasets for reporting and business intelligence.
 
 Dataset used:
 
-**Online Retail II (UCI Machine Learning Repository)**
-
+Online Retail II dataset (sourced via Kaggle, originally published by the UCI Machine Learning Repository).
 ~1M e-commerce transactions from a UK-based online retailer.
 
 ---
@@ -40,14 +39,14 @@ Stores cleaned and standardized source data.
 
 Responsibilities include:
 
-* column normalization
-* data type standardization
-* basic data validation
-* source column renaming
+- column normalization
+- data type standardization
+- basic data validation
+- source column renaming
 
 Model:
 
-* `stg_sales`
+- `stg_sales`
 
 ### Core Analytical Layer
 
@@ -55,11 +54,11 @@ Implements the central analytical model using fact and dimension tables.
 
 Tables:
 
-* `fct_order_lines`
-* `fct_orders`
-* `dim_customer`
-* `dim_product`
-* `dim_date`
+- `fct_order_lines`
+- `fct_orders`
+- `dim_customer`
+- `dim_product`
+- `dim_date`
 
 The core layer implements a dimensional model with shared dimensions, an atomic transaction-level fact table, and a derived invoice-level fact table.
 This layer standardizes business entities and prepares data for analytical use.
@@ -70,15 +69,15 @@ Domain-specific analytical datasets for business teams.
 
 Domains:
 
-* finance
-* marketing
-* product
+- finance
+- marketing
+- product
 
 Tables:
 
-* `mart_revenue_daily`
-* `mart_customer_metrics`
-* `mart_product_performance`
+- `mart_revenue_daily`
+- `mart_customer_metrics`
+- `mart_product_performance`
 
 These datasets are optimized for BI reporting and analytical queries.
 
@@ -88,14 +87,14 @@ These datasets are optimized for BI reporting and analytical queries.
 
 Source dataset contains:
 
-* Invoice
-* StockCode
-* Description
-* Quantity
-* InvoiceDate
-* UnitPrice
-* CustomerID
-* Country
+- Invoice
+- StockCode
+- Description
+- Quantity
+- InvoiceDate
+- UnitPrice
+- CustomerID
+- Country
 
 Pipeline Flow:
 
@@ -142,7 +141,7 @@ Dimension tables provide business context used for filtering, grouping, and aggr
 
 ### Fact Table — `fct_order_lines`
 
-**Grain:** One row per cleaned invoice line after duplicate sequencing.
+--Grain:-- One row per cleaned invoice line after duplicate sequencing.
 
 Contains:
 
@@ -160,7 +159,7 @@ References shared dimensions through:
 
 `fct_orders` is a derived invoice-level fact table built from `fct_order_lines`.
 
-**Grain:** One row per invoice.
+--Grain:-- One row per invoice.
 
 Contains:
 
@@ -177,9 +176,9 @@ References shared dimensions through:
 
 ### Dimension Tables
 
-* dim_customer
-* dim_product
-* dim_date
+- dim_customer
+- dim_product
+- dim_date
 
 Dimension design:
 
@@ -372,13 +371,25 @@ retail-analytics-warehouse/
 │       └── product
 │           └── mart_product_performance.sql
 │
+├── docs
+│   ├── analytics_warehouse_data_model.png
+│   └── dbt_lineage_full.png
+│
 ├── macros
 ├── tests
 ├── infra
-├── .github/workflows
+│   └── init_snowflake.sql
+│
+├── .github
+│   └── workflows
+│       ├── dbt-ci.yml
+│       └── dbt-cd.yml
+│
 ├── dbt_project.yml
 └── README.md
 ```
+
+
 
 ---
 
