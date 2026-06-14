@@ -13,7 +13,7 @@ dates AS (
 FINAL AS (
     SELECT
         order_date,
-        to_number(to_char(order_date,'YYYYMMDD')) AS date_key, -- date_key - Enterpcie Practise (Spot #1)
+        to_number(to_char(order_date,'YYYYMMDD')) AS date_key, -- date_key - Enterpcie Practise (Spot #1 and last -> в fct_order_lines - date_key подтягиваем отсюда via JOIN)
         year(order_date) AS year,
         month(order_date) AS month,
         to_char(order_date,'Mon') AS month_name,

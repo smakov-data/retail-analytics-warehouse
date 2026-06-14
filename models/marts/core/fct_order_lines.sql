@@ -8,6 +8,11 @@ dim_customer AS (
     SELECT * FROM {{ ref('dim_customer') }}
 ),
 
+dim_date AS (
+    SELECT * FROM {{ ref('dim_date')}}
+),
+
+
 final AS (
     SELECT
         s.order_line_key,
@@ -18,7 +23,7 @@ final AS (
 
         s.stock_code,
         TO_DATE(s.invoice_timestamp) AS order_date,
-        to_number(to_char(TO_DATE(s.invoice_timestamp),'YYYYMMDD')) AS date_key, -- date_key - Enterpcie Practise (Spot #2)
+        d.date_key, -- тянем из dim_date
         s.invoice_timestamp,
 
         s.quantity,
@@ -30,6 +35,9 @@ final AS (
     FROM stg_sales s
     LEFT JOIN dim_customer c
         ON s.customer_id = c.customer_id
+    LEFT JOIN dim_date d
+        ON TO_DATE(s.invoice_timestamp) = d.order_date -- подгонка формата инвойса со временем К order_date
+        -- кста, такой же ту_дейт используется в dim_date - это не бьется, просто такой же подход 
 )
 
 SELECT * FROM final

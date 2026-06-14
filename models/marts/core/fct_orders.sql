@@ -1,6 +1,6 @@
 
 with stg_sales as (
-    select * from {{ ref('stg_sales') }}
+    select * from {{ ref('fct_order_lines') }}
 ),
 
 final as (
@@ -8,10 +8,13 @@ final as (
         -- ID
         invoice_id,
         max(customer_id) as customer_id, -- если в инвойсе один customer_id
-        
+        min(customer_key) as customer_key, -- ##consistent dimention modeling
+        --min = odred_lines = same customer + many products
+
         -- DATE
         min(invoice_timestamp) as invoice_timestamp,
         to_date(min(invoice_timestamp)) as order_date,
+        min(date_key) as date_key,
         
         -- FLAG
         max(case when is_cancelled then 1 else 0 end) as has_cancelled_lines,
