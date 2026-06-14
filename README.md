@@ -25,6 +25,7 @@ The objective is to transform raw transactional data into a structured analytics
 Dataset used:
 
 Online Retail II dataset (sourced via Kaggle, originally published by the UCI Machine Learning Repository).
+
 ~1M e-commerce transactions from a UK-based online retailer.
 
 ---
