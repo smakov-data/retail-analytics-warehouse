@@ -61,6 +61,7 @@ Tables:
 * `dim_product`
 * `dim_date`
 
+The core layer implements a dimensional model with shared dimensions, an atomic transaction-level fact table, and a derived invoice-level fact table.
 This layer standardizes business entities and prepares data for analytical use.
 
 ### Data Mart Layer
@@ -120,47 +121,71 @@ The pipeline transforms raw transactional records into structured analytical dat
 
 ---
 
-## 4. Star Schema & Core Models
+## 4. Analytics Warehouse Data Model
 
-The warehouse implements a dimensional star schema designed for analytical reporting and BI workloads.
+The core model follows dimensional modeling principles with an atomic fact table, shared dimensions, and derived fact tables used for invoice-level analytics.
 
 Fact tables store business events and measures.
 
 Dimension tables provide business context used for filtering, grouping, and aggregation.
 
+### Data Model Diagram
+
+![Analytics Warehouse Data Model](docs/analytics_warehouse_data_model.png)
+
+
 ### Fact Table — `fct_order_lines`
 
-**Grain:** One row per product per invoice.
+**Grain:** One row per cleaned invoice line after duplicate sequencing.
 
 Contains:
 
-* quantity
-* unit price
-* sales amount
-* cancellation indicator
+- quantity
+- unit price
+- sales amount
+- cancellation indicator
+
+References shared dimensions through:
+- `customer_key`
+- `date_key`
+- `stock_code`
 
 ### Fact Table — `fct_orders`
+
+`fct_orders` is a derived invoice-level fact table built from `fct_order_lines`.
 
 **Grain:** One row per invoice.
 
 Contains:
 
-* total items
-* gross revenue
-* cancelled revenue
-* net revenue
+- gross items
+- returned items
+- net items
+- gross revenue
+- cancelled revenue
+- net revenue
+
+References shared dimensions through:
+- `customer_key`
+- `date_key`
 
 ### Dimension Tables
 
-* `dim_customer`
-* `dim_product`
-* `dim_date`
+* dim_customer
+* dim_product
+* dim_date
+
+Dimension design:
+
+- `dim_customer` uses `customer_key` as the warehouse surrogate key and retains `customer_id` as the source business key.
+- `dim_date` uses `date_key` (YYYYMMDD) as the analytical date key and retains `order_date` as the calendar date.
+- `dim_product` uses `stock_code` as the product business key.
 
 These dimensions support analysis across:
 
-* customers
-* products
-* time
+- customers
+- products
+- time
 
 ---
 
@@ -170,44 +195,52 @@ These dimensions support analysis across:
 
 Daily financial metrics:
 
-* gross revenue
-* net revenue
-* cancelled revenue
+- gross revenue
+- net revenue
+- cancelled revenue
 
 Used for:
 
-* financial reporting
-* revenue trend analysis
+- financial reporting
+- revenue trend analysis
+
+Primary analytical key:
+
+- date_key
 
 ### Marketing Mart — `mart_customer_metrics`
 
 Customer-level metrics:
 
-* number of orders
-* total revenue
-* first purchase date
-* last purchase date
+- number of orders
+- total revenue
+- first purchase date
+- last purchase date
 
 Used for:
 
-* customer analytics
-* customer value analysis
-* retention analysis
+- customer analytics
+- customer value analysis
+- retention analysis
+
+Primary analytical key:
+
+- customer_key
 
 ### Product Mart — `mart_product_performance`
 
 Product-level performance metrics:
 
-* units sold
-* order counts
-* revenue share
-* return rate
-* cumulative revenue share
+- units sold
+- order counts
+- revenue share
+- return rate
+- cumulative revenue share
 
 Used for:
 
-* product performance analysis
-* assortment optimization
+- product performance analysis
+- assortment optimization
 
 ---
 
@@ -217,16 +250,24 @@ Data quality is implemented using dbt tests.
 
 Controls include:
 
-* not null validation
-* uniqueness validation
-* referential integrity validation
-* relationship testing between fact and dimension tables
+- not null validation
+- uniqueness validation
+- referential integrity validation
+- relationship testing between fact and dimension tables
 
 Examples:
 
-* `not_null`
-* `unique`
-* `relationships`
+- `not_null`
+- `unique`
+- `relationships`
+
+Relationship tests validate:
+
+- fct_order_lines.date_key → dim_date.date_key
+- fct_order_lines.customer_key → dim_customer.customer_key
+- fct_orders.date_key → dim_date.date_key
+- fct_orders.customer_key → dim_customer.customer_key
+- mart-level references to shared dimensions
 
 These controls ensure consistency and integrity across the analytical model.
 
@@ -238,8 +279,8 @@ The project uses GitHub Actions to automate validation and deployment workflows.
 
 Pipeline definitions:
 
-* `.github/workflows/dbt-ci.yml`
-* `.github/workflows/dbt-cd.yml`
+- `.github/workflows/dbt-ci.yml`
+- `.github/workflows/dbt-cd.yml`
 
 ### Continuous Integration (CI)
 
@@ -247,12 +288,12 @@ CI validates project changes before deployment.
 
 Typical validation steps:
 
-* checkout repository
-* setup Python
-* install dbt-snowflake
-* install dependencies
-* dbt parsing and validation
-* dbt test execution
+- checkout repository
+- setup Python
+- install dbt-snowflake
+- install dependencies
+- dbt parsing and validation
+- dbt test execution
 
 ### Continuous Deployment (CD)
 
@@ -260,11 +301,11 @@ CD runs automatically on push to the main branch.
 
 Pipeline steps:
 
-* checkout repository
-* install dbt
-* dbt deps
-* dbt debug
-* dbt build
+- checkout repository
+- install dbt
+- dbt deps
+- dbt debug
+- dbt build
 
 This process automatically deploys the latest analytical models into Snowflake.
 
@@ -281,18 +322,18 @@ infra/
 
 The script creates:
 
-* warehouse
-* database
-* schema
-* roles
-* permissions
+- warehouse
+- database
+- schema
+- roles
+- permissions
 
 Example components:
 
-* `DBT_WH`
-* `ANALYTICS`
-* `RAW`
-* `MART`
+- `DBT_WH`
+- `ANALYTICS`
+- `RAW`
+- `MART`
 
 This makes the environment reproducible and easy to deploy.
 
@@ -339,13 +380,13 @@ retail-analytics-warehouse/
 
 The analytical model supports answering questions such as:
 
-* How does revenue change over time?
-* Which products generate the highest revenue?
-* Which customers contribute the most revenue?
-* What percentage of sales is returned or cancelled?
-* Which products have the highest return rates?
-* How many active customers purchase each month?
-* How does customer purchasing behavior evolve over time?
+- How does revenue change over time?
+- Which products generate the highest revenue?
+- Which customers contribute the most revenue?
+- What percentage of sales is returned or cancelled?
+- Which products have the highest return rates?
+- How many active customers purchase each month?
+- How does customer purchasing behavior evolve over time?
 
 ---
 
@@ -353,40 +394,41 @@ The analytical model supports answering questions such as:
 
 ### Data Modeling
 
-* dimensional modeling
-* star schema design
-* fact and dimension tables
+- dimensional modeling
+- star schema design
+- surrogate keys
+- fact and dimension tables
 
 ### Data Transformation
 
-* dbt
+- dbt
 
 ### Data Warehouse
 
-* Snowflake
+- Snowflake
 
 ### Automation
 
-* GitHub Actions
-* CI/CD pipelines
+- GitHub Actions
+- CI/CD pipelines
 
 ### Development Tools
 
-* SQL
-* Git
-* GitHub
+- SQL
+- Git
+- GitHub
 
 ---
 
 ## 12. Technologies
 
-* Snowflake
-* dbt
-* SQL
-* Git
-* GitHub Actions
-* CI/CD
-* Dimensional Modeling
+- Snowflake
+- dbt
+- SQL
+- Git
+- GitHub Actions
+- CI/CD
+- Dimensional Modeling
 
 ---
 
@@ -394,11 +436,11 @@ The analytical model supports answering questions such as:
 
 This project demonstrates capabilities relevant for:
 
-* Analytics Engineer
-* Data Engineer
-* Data Warehouse Developer
-* BI Engineer
-* SQL Developer
+- Analytics Engineer
+- Data Engineer
+- Data Warehouse Developer
+- BI Engineer
+- SQL Developer
 
 ---
 
@@ -406,9 +448,9 @@ This project demonstrates capabilities relevant for:
 
 The solution delivers:
 
-* standardized analytical datasets
-* dimensional models optimized for reporting
-* automated testing and deployment workflows
-* reusable business-focused data marts
+- standardized analytical datasets
+- dimensional models optimized for reporting
+- automated testing and deployment workflows
+- reusable business-focused data marts
 
 The project demonstrates practical Analytics Engineering workflows using Snowflake, dbt, SQL, Git, and GitHub Actions.
