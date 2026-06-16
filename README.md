@@ -1,6 +1,6 @@
-# Enterprise Retail Analytics Data Warehouse
+# Retail Analytics Warehouse
 
---Snowflake + dbt + GitHub Actions (CI/CD)--
+Snowflake • dbt • GitHub Actions • CI/CD
 
 ## 1. Business Scenario
 
@@ -33,6 +33,10 @@ Online Retail II dataset (sourced via Kaggle, originally published by the UCI Ma
 ## 2. Architecture Overview
 
 The solution follows a modern dbt layered architecture.
+
+### Architecture Diagram
+
+![Architecture](docs/architecture_diagram.png)
 
 ### Staging Layer
 
@@ -142,7 +146,7 @@ Dimension tables provide business context used for filtering, grouping, and aggr
 
 ### Fact Table — `fct_order_lines`
 
---Grain:-- One row per cleaned invoice line after duplicate sequencing.
+**Grain:** One row per cleaned invoice line after duplicate sequencing.
 
 Contains:
 
@@ -160,7 +164,7 @@ References shared dimensions through:
 
 `fct_orders` is a derived invoice-level fact table built from `fct_order_lines`.
 
---Grain:-- One row per invoice.
+**Grain:** One row per invoice.
 
 Contains:
 
@@ -472,3 +476,16 @@ The solution delivers:
 - reusable business-focused data marts
 
 The project demonstrates practical Analytics Engineering workflows using Snowflake, dbt, SQL, Git, and GitHub Actions.
+
+## 15. Key Skills Demonstrated
+
+- Snowflake Data Warehouse Development
+- dbt Data Transformations
+- Dimensional Data Modeling
+- Star Schema Design
+- Fact and Dimension Modeling
+- Data Quality Testing
+- GitHub Actions CI/CD
+- SQL Development
+- Analytics Engineering Workflows
+- Business Data Mart Development
